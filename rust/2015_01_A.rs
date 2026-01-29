@@ -1,16 +1,19 @@
-use std::io;
+use std::io::{self, Read};
 
-fn main() {
+fn main() -> io::Result<()> {
     let mut input = String::new();
-    let mut floor = 0;
-    
-    io::stdin().read_line(&mut input).expect("lineam legere non potui");
-    for i in input.chars() {
-        match i {
-            '(' => floor += 1,
-            ')' => floor -= 1,
-            _ => (),
-        }
-    }
-    println!("{}", floor);
+    io::stdin().read_to_string(&mut input)?;
+
+    let floor: i32 = input
+        .trim()
+        .bytes()
+        .map(|b| match b {
+            b'(' => 1,
+            b')' => -1,
+            _ => 0,
+        })
+        .sum();
+
+    println!("{floor}");
+    Ok(())
 }
