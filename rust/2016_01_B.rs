@@ -1,40 +1,115 @@
 use std::collections::HashSet;
-use std::io;
+use std::io::{self, Read};
 
-fn main() {
-	let mut input = String::new();
-	let mut d: i32 = 0;  // North
-	let mut x = 0;
-	let mut y = 0;
-	let mut seen: HashSet<(i32, i32)> = HashSet::new();
-	let mut loc = (0, 0);
-	seen.insert(loc);
+#[derive(Copy, Clone, Debug)]
+enum Turn {
+    Left,
+    Right,
+}
 
-    io::stdin().read_line(&mut input).expect("lineam legere non potui");
-    'find: for key in input.trim().split(", ") {
-    	let mut chars = key.chars();
-    	let dir = chars.next().unwrap();
-    	let amt: i32 = chars.as_str().parse().unwrap();
-    	d = match dir {
-    		'R' => (d + 1).rem_euclid(4),
-    		'L' => (d - 1).rem_euclid(4),
-    		_ => panic!("'{:?}'' debet esse L vel R", dir),
-    	};
-		for _ in 1..=amt {
-			match d {
-  				0 => y += 1,
-  				1 => x += 1,
-  				2 => y -= 1,
-  				3 => x -= 1,
-    	        _ => println!("directio invalida"),
-			}
-			loc = (x, y);
-			if seen.contains(&loc) {
-				break 'find;
-			} else {
-				seen.insert(loc.clone());
-			}
-		}
+#[derive(Copy, Clone, Debug)]
+enum Direction {
+    N,
+    E,
+    S,
+    W,
+}
+
+impl Direction {
+    fn turn(self, t: Turn) -> Self {
+        use Direction::*;
+        use Turn::*;
+
+        match (self, t) {
+            (N, Left) => W,
+            (E, Left) => N,
+            (S, Left) => E,
+            (W, Left) => S,
+            (N, Right) => E,
+            (E, Right) => S,
+            (S, Right) => W,
+            (W, Right) => N,
+        }
     }
-    println!("{} + {} = {}", x.abs(), y.abs(), x.abs() + y.abs());
+
+    fn delta(self) -> (i32, i32) {
+        match self {
+            Direction::N => (0, 1),
+            Direction::E => (1, 0),
+            Direction::S => (0, -1),
+            Direction::W => (-1, 0),
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
+struct Pos {
+    x: i32,
+    y: i32,
+}
+
+impl Pos {
+    fn step(self, dir: Direction, amt: i32) -> Self {
+        let (dx, dy) = dir.delta();
+        Self {
+            x: self.x + dx * amt,
+            y: self.y + dy * amt,
+        }
+    }
+
+    fn manhattan(self) -> i32 {
+        self.x.abs() + self.y.abs()
+    }
+}
+
+fn solve(line: &str) -> i32 {
+    let mut pos = Pos::default();
+    let mut direction = Direction::N;
+    let mut seen: HashSet<Pos> = HashSet::new();
+    seen.insert(pos);
+
+    'find: for key in line
+        .trim()
+        .split(',')
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+    {
+        let mut it = key.chars();
+        let turn = match it.next().unwrap() {
+            'R' => Turn::Right,
+            'L' => Turn::Left,
+            _ => unreachable!(),
+        };
+        let amt: i32 = it.as_str().parse().unwrap();
+
+        direction = direction.turn(turn);
+        for _ in 0..amt {
+            pos = pos.step(direction, 1);
+            if !seen.insert(pos) {
+                break 'find;
+            }
+        }
+    }
+
+    pos.manhattan()
+}
+
+fn main() -> io::Result<()> {
+    let mut line = String::new();
+    io::stdin().read_to_string(&mut line)?;
+
+    let distance = solve(&line);
+    println!("{distance}");
+
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::solve;
+
+    #[test]
+    fn examples() {
+        assert_eq!(solve("R8, R4, R4, R8"), 4);
+    }
 }
