@@ -1,12 +1,16 @@
 use std::io;
 
-enum Dir { Left, Right }
+enum Dir {
+    Left,
+    Right,
+}
 
 struct NumberMap {
     name: &'static [u8],
     value: u32,
 }
 
+#[rustfmt::skip]
 const NUMBER_MAP: &[NumberMap] = &[
     NumberMap { name: b"zero",  value: 0 },
     NumberMap { name: b"one",   value: 1 },
@@ -41,7 +45,7 @@ fn find_number(line: &str, dir: Dir) -> u32 {
         {
             return n;
         }
-    };
+    }
 
     panic!("nullus numerus inventus est");
 }
@@ -49,9 +53,7 @@ fn find_number(line: &str, dir: Dir) -> u32 {
 fn solve(input: &str) -> u32 {
     input
         .lines()
-        .map(|line| {
-            find_number(line, Dir::Left) * 10 + find_number(line, Dir::Right)
-        })
+        .map(|line| find_number(line, Dir::Left) * 10 + find_number(line, Dir::Right))
         .sum()
 }
 
