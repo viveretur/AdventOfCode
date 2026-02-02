@@ -1,24 +1,21 @@
+use std::collections::HashMap;
 use std::io;
 
-fn solve(input: &str) -> i32 {
+fn solve(input: &str) -> i64 {
     let mut it = input
         .split_ascii_whitespace()
-        .map(|s| s.parse::<i32>().unwrap());
+        .map(|s| s.parse::<i64>().unwrap());
 
     let mut left = Vec::new();
-    let mut right = Vec::new();
+    let mut right = HashMap::new();
 
     while let (Some(l), Some(r)) = (it.next(), it.next()) {
         left.push(l);
-        right.push(r);
+        *right.entry(r).or_insert(0) += 1;
     }
 
-    left.sort_unstable();
-    right.sort_unstable();
-
     left.into_iter()
-        .zip(right.into_iter())
-        .map(|(a, b)| (b - a).abs())
+        .map(|n| n * right.get(&n).copied().unwrap_or(0))
         .sum()
 }
 
@@ -42,6 +39,6 @@ mod tests {
 3    9
 3    3"#;
 
-        assert_eq!(solve(data), 11);
+        assert_eq!(solve(data), 31);
     }
 }
