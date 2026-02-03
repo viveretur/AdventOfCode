@@ -1,3 +1,4 @@
+use aoc::split_first_off;
 use std::collections::HashSet;
 use std::io::{self, Read};
 
@@ -74,13 +75,13 @@ fn solve(line: &str) -> i32 {
         .map(str::trim)
         .filter(|s| !s.is_empty())
     {
-        let mut it = key.chars();
-        let turn = match it.next().unwrap() {
+        let (turn, amt) = split_first_off(key);
+        let turn = match turn {
             'R' => Turn::Right,
             'L' => Turn::Left,
             _ => unreachable!(),
         };
-        let amt: i32 = it.as_str().parse().unwrap();
+        let amt: i32 = amt.parse().unwrap();
 
         direction = direction.turn(turn);
         for _ in 0..amt {

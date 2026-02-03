@@ -1,3 +1,4 @@
+use aoc::split_first_off;
 use std::io::{self, Read};
 
 #[derive(Copy, Clone, Debug)]
@@ -71,13 +72,13 @@ fn solve(line: &str) -> i32 {
         .map(str::trim)
         .filter(|s| !s.is_empty())
     {
-        let mut it = key.chars();
-        let turn = match it.next().unwrap() {
+        let (turn, amt) = split_first_off(key);
+        let turn = match turn {
             'R' => Turn::Right,
             'L' => Turn::Left,
             _ => unreachable!(),
         };
-        let amt: i32 = it.as_str().parse().unwrap();
+        let amt: i32 = amt.parse().unwrap();
 
         direction = direction.turn(turn);
         pos = pos.step(direction, amt);
