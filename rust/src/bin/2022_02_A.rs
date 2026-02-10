@@ -1,0 +1,47 @@
+use std::io;
+
+// rows: you  (X=Rock, Y=Paper, Z=Scissors)
+// cols: them (A=Rock, B=Paper, C=Scissors)
+const MATCHUP_POINTS: [[u32; 3]; 3] = [[3, 0, 6], [6, 3, 0], [0, 6, 3]];
+
+fn score(them: u8, you: u8) -> u32 {
+    debug_assert!((b'A'..=b'C').contains(&them));
+    debug_assert!((b'X'..=b'Z').contains(&you));
+
+    let matchup = MATCHUP_POINTS[(you - b'X') as usize][(them - b'A') as usize];
+    let shape = (you - b'W') as u32; // X/Y/Z -> 1/2/3
+    matchup + shape
+}
+
+fn solve(data: &str) -> u32 {
+    data.lines()
+        .filter(|l| !l.is_empty())
+        .map(|line| {
+            let bytes = line.as_bytes();
+            score(bytes[0], bytes[2])
+        })
+        .sum()
+}
+
+fn main() -> io::Result<()> {
+    let data = io::read_to_string(io::stdin())?;
+    println!("{}", solve(&data));
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::solve;
+    use indoc::indoc;
+
+    #[test]
+    fn examples() {
+        let data = indoc! {"
+			A Y
+			B X
+			C Z
+		"};
+
+        assert_eq!(solve(data), 15)
+    }
+}
